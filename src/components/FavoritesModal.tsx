@@ -74,7 +74,7 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
                     }}
                   >
                     <img
-                      src={p.images[0] || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+                      src={p.images[0] || '/images/academic_textbooks_1792159211354.jpg'}
                       alt={p.title}
                       className="w-14 h-14 rounded-xl object-cover bg-stone-100 shrink-0"
                       referrerPolicy="no-referrer"

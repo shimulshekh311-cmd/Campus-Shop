@@ -326,9 +326,12 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                     {order.items.map((item, idx) => (
                       <div key={idx} className="py-3 first:pt-0 last:pb-0 flex items-start gap-4">
                         <img
-                          src={item.imageUrl}
+                          src={item.imageUrl || '/images/academic_textbooks_1792159211354.jpg'}
                           alt={item.productTitle}
                           className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-stone-200 shrink-0 bg-stone-100"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/academic_textbooks_1792159211354.jpg';
+                          }}
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm sm:text-base font-bold text-stone-900 truncate">

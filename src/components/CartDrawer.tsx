@@ -65,7 +65,7 @@ export const CartDrawer: React.FC = () => {
                   className="flex gap-3 p-3 rounded-2xl border border-stone-200/90 bg-stone-50/50"
                 >
                   <img
-                    src={item.imageUrl || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+                    src={item.imageUrl || '/images/academic_textbooks_1792159211354.jpg'}
                     alt={item.productTitle}
                     className="w-16 h-16 rounded-xl object-cover bg-stone-100 shrink-0"
                     referrerPolicy="no-referrer"

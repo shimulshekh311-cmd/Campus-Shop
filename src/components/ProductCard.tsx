@@ -43,11 +43,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClick={() => onOpenDetails(product)}
       >
         <img
-          src={product.images[0] || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+          src={product.images[0] || '/images/academic_textbooks_1792159211354.jpg'}
           alt={product.title}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           referrerPolicy="no-referrer"
           loading="lazy"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/images/academic_textbooks_1792159211354.jpg';
+          }}
         />
 
         {/* Floating Favorite Button */}

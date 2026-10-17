@@ -132,7 +132,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="lg:col-span-5 hidden lg:block">
             <div className="relative rounded-2xl overflow-hidden shadow-md border border-stone-200 bg-stone-100 group">
               <img
-                src="/src/assets/images/campus_hero_banner_1792159209821.jpg"
+                src="/images/campus_hero_banner_1792159209821.jpg"
                 alt="Dhaka Central University Students"
                 className="w-full h-56 object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"

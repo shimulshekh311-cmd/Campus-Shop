@@ -138,7 +138,7 @@
       "originalPrice": 650,
       "stockQuantity": 4,
       "images": [
-        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+        "/images/academic_textbooks_1792159211354.jpg"
       ],
       "isNegotiable": true,
       "isAvailable": true,
@@ -169,7 +169,7 @@
       "originalPrice": 850,
       "stockQuantity": 24,
       "images": [
-        "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg"
+        "/images/campus_varsity_hoodie_1792159209809.jpg"
       ],
       "isNegotiable": false,
       "isAvailable": true,
@@ -202,7 +202,7 @@
       "originalPrice": 280,
       "stockQuantity": 10,
       "images": [
-        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+        "/images/academic_textbooks_1792159211354.jpg"
       ],
       "isNegotiable": false,
       "isAvailable": true,
@@ -232,7 +232,7 @@
       "originalPrice": 1650,
       "stockQuantity": 2,
       "images": [
-        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+        "/images/academic_textbooks_1792159211354.jpg"
       ],
       "isNegotiable": true,
       "isAvailable": true,
@@ -262,7 +262,7 @@
       "originalPrice": 480,
       "stockQuantity": 3,
       "images": [
-        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+        "/images/academic_textbooks_1792159211354.jpg"
       ],
       "isNegotiable": true,
       "isAvailable": true,
@@ -292,7 +292,7 @@
       "originalPrice": 450,
       "stockQuantity": 15,
       "images": [
-        "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg"
+        "/images/campus_varsity_hoodie_1792159209809.jpg"
       ],
       "isNegotiable": false,
       "isAvailable": true,
@@ -325,7 +325,7 @@
           "productTitle": "অনার্স ৩য় বর্ষের মাইক্রোইকোনমিক্স ও ম্যাক্রোইকোনমিক্স কম্বো সেট",
           "unitPrice": 380,
           "quantity": 1,
-          "imageUrl": "/src/assets/images/academic_textbooks_1792159211354.jpg",
+          "imageUrl": "/images/academic_textbooks_1792159211354.jpg",
           "storeId": "store-eden-books"
         }
       ],
@@ -360,7 +360,7 @@
           "productTitle": "অফিসিয়াল ক্যাম্পাস উইন্টার হুডি - ডিপ গ্রিন অ্যান্ড গোল্ড",
           "unitPrice": 650,
           "quantity": 1,
-          "imageUrl": "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg",
+          "imageUrl": "/images/campus_varsity_hoodie_1792159209809.jpg",
           "storeId": "store-titumir-gadgets"
         }
       ],
@@ -395,7 +395,7 @@
           "productTitle": "ঢাকা কলেজ স্পোর্টস এডিশন জার্সি - এমারেল্ড গ্রিন",
           "unitPrice": 320,
           "quantity": 2,
-          "imageUrl": "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg",
+          "imageUrl": "/images/campus_varsity_hoodie_1792159209809.jpg",
           "storeId": "store-titumir-gadgets"
         }
       ],

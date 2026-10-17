@@ -90,10 +90,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           {/* Left Column: Product Image & Badges (5 cols) */}
           <div className="md:col-span-5 bg-stone-100 relative min-h-[260px] md:min-h-full flex items-center justify-center">
             <img
-              src={product.images[0] || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+              src={product.images[0] || '/images/academic_textbooks_1792159211354.jpg'}
               alt={product.title}
               className="w-full h-full object-cover max-h-[380px] md:max-h-full"
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/images/academic_textbooks_1792159211354.jpg';
+              }}
             />
             <div className="absolute top-4 left-4 flex flex-col gap-1.5">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#0D5C3A] text-white shadow-xs">

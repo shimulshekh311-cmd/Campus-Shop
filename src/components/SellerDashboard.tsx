@@ -178,8 +178,8 @@ export const SellerDashboard: React.FC<SellerDashboardProps> = ({
           campusId: newCampusId,
           images: [
             newCategory === 'clothing'
-              ? '/src/assets/images/campus_varsity_hoodie_1792159209809.jpg'
-              : '/src/assets/images/academic_textbooks_1792159211354.jpg',
+              ? '/images/campus_varsity_hoodie_1792159209809.jpg'
+              : '/images/academic_textbooks_1792159211354.jpg',
           ],
         }),
       });
@@ -457,7 +457,7 @@ export const SellerDashboard: React.FC<SellerDashboardProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <img
-                        src={p.images[0] || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+                        src={p.images[0] || '/images/academic_textbooks_1792159211354.jpg'}
                         alt={p.title}
                         className="w-12 h-12 rounded-xl object-cover bg-stone-100 shrink-0"
                         referrerPolicy="no-referrer"

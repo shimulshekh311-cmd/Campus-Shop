@@ -180,7 +180,7 @@ export const MyOrdersModal: React.FC<MyOrdersModalProps> = ({
                     <div key={idx} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
                         <img
-                          src={item.imageUrl || '/src/assets/images/academic_textbooks_1792159211354.jpg'}
+                          src={item.imageUrl || '/images/academic_textbooks_1792159211354.jpg'}
                           alt={item.productTitle}
                           className="w-10 h-10 rounded-lg object-cover bg-stone-100 shrink-0"
                           referrerPolicy="no-referrer"
