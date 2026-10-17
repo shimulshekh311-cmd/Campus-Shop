@@ -59,7 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     role,
     linkedAccounts,
     logout,
-    loginDemo,
     switchAccount,
     createLinkedBuyerAccount,
     openAuthModal,
@@ -69,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { lang, toggleLang, t } = useLanguage();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const getRoleDisplayName = (r: UserRole) => {
+  const getRoleDisplayName = (r: UserRole | 'guest') => {
     switch (r) {
       case 'admin':
         return 'সুপার অ্যাডমিন';
@@ -81,8 +80,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         return 'ডেলিভারি রানার';
       case 'factory_staff':
         return 'ফ্যাক্টরি ইনচার্জ';
-      default:
+      case 'buyer':
         return 'বায়ার (ক্রেতা)';
+      default:
+        return 'অতিথি';
     }
   };
 
@@ -257,232 +258,159 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* User Account / Profile Menu (Desktop) */}
-            <div className="relative">
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="h-10 px-2 sm:px-2.5 rounded-xl border border-stone-200 hover:border-stone-300 bg-white flex items-center gap-2 transition-colors text-stone-800 shadow-2xs"
-                title="একাউন্ট মেনু"
-              >
-                <div className="w-7 h-7 rounded-lg bg-[#0D5C3A]/10 text-[#0D5C3A] flex items-center justify-center text-xs font-bold">
-                  {user?.name ? user.name.charAt(0) : 'U'}
-                </div>
-                <div className="flex flex-col text-left hidden lg:flex">
-                  <span className="text-xs font-bold text-stone-900 max-w-[90px] truncate leading-tight">
-                    {user?.name || 'অ্যাকাউন্ট'}
-                  </span>
-                  <span className="text-[10px] font-semibold text-[#0D5C3A] leading-tight">
-                    {getRoleDisplayName(role)}
-                  </span>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-stone-400 hidden sm:block" />
-              </button>
-
-              {/* Account Dropdown Modal */}
-              {isUserMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsUserMenuOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-3xl shadow-2xl border border-stone-200 py-2.5 z-50 text-stone-800">
-                    
-                    {/* Current Active Account Card */}
-                    <div className="px-4 py-2.5 border-b border-stone-100">
-                      <p className="text-xs font-bold text-stone-900 truncate">
-                        {user?.name}
-                      </p>
-                      <p className="text-[11px] text-stone-500 truncate">
-                        {user?.email}
-                      </p>
-                      <div className="mt-1 flex items-center gap-1.5">
-                        <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-[#0D5C3A]/10 text-[#0D5C3A] border border-[#0D5C3A]/20">
-                          {getRoleDisplayName(role)}
-                        </span>
-                        {user?.approvalStatus === 'approved' && (
-                          <span className="text-[10px] text-emerald-700 font-semibold">
-                            (অনুমোদিত)
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Open Role-specific Dashboard */}
-                    <div className="py-1 px-2 border-b border-stone-100">
-                      <button
-                        onClick={openCurrentRoleDashboard}
-                        className="w-full px-3 py-2 text-xs font-bold rounded-xl text-left hover:bg-stone-50 text-[#0D5C3A] flex items-center gap-2"
-                      >
-                        <Sparkles className="w-4 h-4 text-amber-500" />
-                        <span>{getRoleDisplayName(role)} ড্যাশবোর্ডে যান</span>
-                      </button>
-                    </div>
-
-                    {/* Buying Rule Notice if seller or staff */}
-                    {role !== 'buyer' && (
-                      <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/60 text-[11px] text-amber-950">
-                        <p className="font-semibold mb-1">
-                          পণ্য কেনার জন্য বায়ার অ্যাকাউন্ট প্রয়োজন:
-                        </p>
-                        {linkedAccounts.some((a) => a.role === 'buyer') ? (
-                          <button
-                            onClick={() => {
-                              const buyerAcc = linkedAccounts.find((a) => a.role === 'buyer');
-                              if (buyerAcc) switchAccount(buyerAcc.id);
-                              setIsUserMenuOpen(false);
-                            }}
-                            className="w-full py-1 px-2 rounded-lg bg-amber-600 text-white font-bold text-center flex items-center justify-center gap-1"
-                          >
-                            <ArrowRightLeft className="w-3.5 h-3.5" />
-                            <span>বায়ার অ্যাকাউন্টে সুইচ করুন</span>
-                          </button>
-                        ) : (
-                          <button
-                            onClick={async () => {
-                              await createLinkedBuyerAccount();
-                              setIsUserMenuOpen(false);
-                            }}
-                            className="w-full py-1 px-2 rounded-lg bg-[#0D5C3A] text-white font-bold text-center flex items-center justify-center gap-1"
-                          >
-                            <UserPlus className="w-3.5 h-3.5" />
-                            <span>১-ক্লিকে বায়ার অ্যাকাউন্ট লিংক করুন</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 1-Click Role Switcher for instant evaluator testing across all 6 roles */}
-                    <div className="px-4 py-2 bg-stone-50 border-b border-stone-100">
-                      <p className="text-[11px] font-bold text-stone-600 mb-1.5 flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                          <span>৬টি রোলের ডেমো টেস্ট:</span>
-                        </span>
-                      </p>
-                      <div className="grid grid-cols-2 gap-1 text-[10px]">
-                        <button
-                          onClick={() => {
-                            loginDemo('buyer');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'buyer'
-                              ? 'bg-[#0D5C3A] text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ১. বায়ার (ক্রেতা)
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            loginDemo('seller');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'seller'
-                              ? 'bg-[#0D5C3A] text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ২. সেলার (বিক্রেতা)
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            loginDemo('pickup_staff');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'pickup_staff'
-                              ? 'bg-teal-800 text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ৩. পিকআপ কর্মী
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            loginDemo('delivery_man');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'delivery_man'
-                              ? 'bg-blue-800 text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ৪. ডেলিভারি ম্যান
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            loginDemo('factory_staff');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'factory_staff'
-                              ? 'bg-amber-800 text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ৫. ফ্যাক্টরি কর্মী
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            loginDemo('admin');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`py-1 px-1.5 rounded-lg text-center font-bold transition-colors ${
-                            role === 'admin'
-                              ? 'bg-red-800 text-white'
-                              : 'bg-white border border-stone-200 hover:bg-stone-100'
-                          }`}
-                        >
-                          ৬. সুপার অ্যাডমিন
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Account Actions */}
-                    <div className="pt-1">
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          openAuthModal();
-                        }}
-                        className="w-full px-4 py-2 text-xs text-left hover:bg-stone-50 flex items-center gap-2 text-stone-700"
-                      >
-                        <UserIcon className="w-4 h-4 text-stone-500" />
-                        লগইন / নতুন অ্যাকাউন্ট রেজিস্ট্রেশন
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          openApplyRole('seller');
-                        }}
-                        className="w-full px-4 py-2 text-xs text-left hover:bg-stone-50 flex items-center gap-2 text-amber-800 font-semibold"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-amber-600" />
-                        বিশেষ অ্যাকাউন্টের জন্য আবেদন করুন
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          logout();
-                        }}
-                        className="w-full px-4 py-2 text-xs text-left hover:bg-rose-50 text-rose-700 flex items-center gap-2"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        {t('logout')}
-                      </button>
-                    </div>
-
+            {!user ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('login')}
+                  className="h-10 px-3 sm:px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#0D5C3A] flex items-center gap-2 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                >
+                  <UserIcon className="w-4 h-4 text-[#0D5C3A]" />
+                  <span>লগইন / রেজিস্টার</span>
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="h-10 px-2 sm:px-2.5 rounded-xl border border-stone-200 hover:border-stone-300 bg-white flex items-center gap-2 transition-colors text-stone-800 shadow-2xs cursor-pointer"
+                  title="একাউন্ট মেনু"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#0D5C3A]/10 text-[#0D5C3A] flex items-center justify-center text-xs font-bold">
+                    {user.name ? user.name.charAt(0) : 'U'}
                   </div>
-                </>
-              )}
-            </div>
+                  <div className="flex flex-col text-left hidden lg:flex">
+                    <span className="text-xs font-bold text-stone-900 max-w-[110px] truncate leading-tight">
+                      {user.name}
+                    </span>
+                    <span className="text-[10px] font-semibold text-[#0D5C3A] leading-tight">
+                      {getRoleDisplayName(role)}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-stone-400 hidden sm:block" />
+                </button>
+
+                {/* Account Dropdown Modal */}
+                {isUserMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-3xl shadow-2xl border border-stone-200 py-2.5 z-50 text-stone-800">
+                      
+                      {/* Current Active Account Card */}
+                      <div className="px-4 py-2.5 border-b border-stone-100">
+                        <p className="text-xs font-bold text-stone-900 truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-[11px] text-stone-500 truncate">
+                          {user.email}
+                        </p>
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-[#0D5C3A]/10 text-[#0D5C3A] border border-[#0D5C3A]/20">
+                            {getRoleDisplayName(role)}
+                          </span>
+                          {user.approvalStatus === 'approved' && (
+                            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              অনুমোদিত
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Open Role-specific Dashboard */}
+                      {role !== 'buyer' && (
+                        <div className="py-1 px-2 border-b border-stone-100">
+                          <button
+                            type="button"
+                            onClick={openCurrentRoleDashboard}
+                            className="w-full px-3 py-2 text-xs font-bold rounded-xl text-left hover:bg-stone-50 text-[#0D5C3A] flex items-center gap-2 cursor-pointer"
+                          >
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            <span>{getRoleDisplayName(role)} ড্যাশবোর্ডে যান</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Buying Rule Notice if seller or staff */}
+                      {role !== 'buyer' && (
+                        <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/60 text-[11px] text-amber-950">
+                          <p className="font-semibold mb-1">
+                            পণ্য কেনার জন্য বায়ার অ্যাকাউন্ট প্রয়োজন:
+                          </p>
+                          {linkedAccounts.some((a) => a.role === 'buyer') ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const buyerAcc = linkedAccounts.find((a) => a.role === 'buyer');
+                                if (buyerAcc) switchAccount(buyerAcc.id);
+                                setIsUserMenuOpen(false);
+                              }}
+                              className="w-full py-1 px-2 rounded-lg bg-amber-600 text-white font-bold text-center flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <ArrowRightLeft className="w-3.5 h-3.5" />
+                              <span>বায়ার অ্যাকাউন্টে সুইচ করুন</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                await createLinkedBuyerAccount();
+                                setIsUserMenuOpen(false);
+                              }}
+                              className="w-full py-1 px-2 rounded-lg bg-[#0D5C3A] text-white font-bold text-center flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <UserPlus className="w-3.5 h-3.5" />
+                              <span>বায়ার অ্যাকাউন্ট লিংক করুন</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Account Actions */}
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            onOpenAccount();
+                          }}
+                          className="w-full px-4 py-2 text-xs text-left hover:bg-stone-50 flex items-center gap-2 text-stone-700 cursor-pointer"
+                        >
+                          <UserIcon className="w-4 h-4 text-stone-500" />
+                          আমার অ্যাকাউন্ট প্রোফাইল
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            openApplyRole('seller');
+                          }}
+                          className="w-full px-4 py-2 text-xs text-left hover:bg-stone-50 flex items-center gap-2 text-amber-800 font-semibold cursor-pointer"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          বিশেষ ভূমিকার জন্য আবেদন করুন
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            logout();
+                          }}
+                          className="w-full px-4 py-2 text-xs text-left hover:bg-rose-50 text-rose-700 flex items-center gap-2 cursor-pointer font-bold"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          {t('logout')}
+                        </button>
+                      </div>
+
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
           </div>
 

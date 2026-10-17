@@ -101,7 +101,7 @@ export const DeliveryRunnerDashboard: React.FC<DeliveryRunnerDashboardProps> = (
           'x-user-id': user?.id || '',
         },
         body: JSON.stringify({
-          staffId: 'user-pickup-1',
+          staffId: user?.id || 'staff',
           staffName: 'ক্যাম্পাস বুথ প্রতিনিধি',
         }),
       });

@@ -77,6 +77,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
+    if (!user) {
+      setErrorMsg('পণ্য কিনতে প্রথমে লগইন অথবা নতুন রেজিস্ট্রেশন করুন।');
+      return;
+    }
+
     if (role !== 'buyer') {
       setErrorMsg(
         'কোনো বিক্রেতা বা স্টাফ একাউন্ট থেকে সরাসরি পণ্য কেনা যাবে না। পণ্য কিনতে বায়ার একাউন্টে সুইচ বা রেজিস্ট্রেশন করুন।'
@@ -106,7 +111,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user?.id || 'user-buyer-1',
+          'x-user-id': user.id,
         },
         body: JSON.stringify({
           items: cartItems,

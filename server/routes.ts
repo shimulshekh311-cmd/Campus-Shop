@@ -25,12 +25,25 @@ apiRouter.get('/campuses', (_req: Request, res: Response) => {
 });
 
 // Auth Routes
+apiRouter.get('/auth/admin-status', (_req: Request, res: Response) => {
+  const db = getDb();
+  const adminUser = db.users.find((u) => u.role === 'admin');
+  res.json({
+    success: true,
+    hasAdmin: !!adminUser,
+    adminName: adminUser ? adminUser.name : null,
+  });
+});
+
 apiRouter.get('/auth/me', (req: Request, res: Response) => {
-  const userId = (req.headers['x-user-id'] as string) || 'user-buyer-1';
+  const userId = req.headers['x-user-id'] as string;
+  if (!userId) {
+    return res.json({ success: false, user: null, message: 'No active session' });
+  }
   const db = getDb();
   const user = db.users.find((u) => u.id === userId);
   if (!user) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+    return res.json({ success: false, user: null, message: 'User not found' });
   }
 
   const linkedAccounts = db.users.filter(
@@ -45,35 +58,55 @@ apiRouter.get('/auth/me', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/auth/login', (req: Request, res: Response) => {
-  const { email, phone, role, demoUserId, targetUserId } = req.body;
+  const { credential, email, phone, password } = req.body;
   const db = getDb();
 
-  if (targetUserId) {
-    const user = db.users.find((u) => u.id === targetUserId);
-    if (user) return res.json({ success: true, user });
+  const searchVal = (credential || email || phone || '').toString().trim().toLowerCase();
+  if (!searchVal) {
+    return res.status(400).json({
+      success: false,
+      message: 'ইমেইল অথবা মোবাইল নম্বর প্রদান করুন।',
+    });
   }
 
-  if (demoUserId) {
-    const user = db.users.find((u) => u.id === demoUserId);
-    if (user) return res.json({ success: true, user });
+  const user = db.users.find(
+    (u) =>
+      (u.email && u.email.toLowerCase() === searchVal) ||
+      (u.phone && u.phone.trim() === searchVal)
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'এই ইমেইল বা ফোন নম্বরে কোনো অ্যাকাউন্ট পাওয়া যায়নি। অনুগ্রহ করে আগে রেজিস্ট্রেশন করুন।',
+    });
   }
 
-  if (role) {
-    const user = db.users.find((u) => u.role === role);
-    if (user) return res.json({ success: true, user });
+  // If password is provided and user has a password set
+  if (user.password && password) {
+    if (user.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: 'পাসওয়ার্ড সঠিক নয়। দয়া করে সঠিক পাসওয়ার্ড দিন।',
+      });
+    }
   }
 
-  if (email || phone) {
-    const user = db.users.find(
-      (u) =>
-        (email && u.email.toLowerCase() === email.toLowerCase()) ||
-        (phone && u.phone === phone)
-    );
-    if (user) return res.json({ success: true, user });
+  if (user.approvalStatus === 'pending') {
+    return res.status(403).json({
+      success: false,
+      message: 'আপনার অ্যাকাউন্টটি পর্যালোচনায় রয়েছে। অ্যাডমিন অনুমোদনের পর লগইন করতে পারবেন।',
+    });
   }
 
-  const defaultUser = db.users[0];
-  res.json({ success: true, user: defaultUser });
+  if (user.approvalStatus === 'rejected') {
+    return res.status(403).json({
+      success: false,
+      message: 'আপনার অ্যাকাউন্টটি অনুমোদিত হয়নি।',
+    });
+  }
+
+  res.json({ success: true, user });
 });
 
 apiRouter.post('/auth/switch-account', (req: Request, res: Response) => {
@@ -100,34 +133,88 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
     name,
     email,
     phone,
+    password,
     campusId,
     department,
     studentId,
     role,
     pickupPointId,
     factoryName,
+    storeName,
     details,
   } = req.body;
 
-  if (!name || !email || !phone || !campusId) {
-    return res.status(400).json({ success: false, message: 'সব প্রয়োজনীয় তথ্য পূরণ করুন' });
+  if (!name?.trim() || !email?.trim() || !phone?.trim() || !campusId) {
+    return res.status(400).json({ success: false, message: 'সব প্রয়োজনীয় তথ্য (নাম, ইমেইল, মোবাইল ও ক্যাম্পাস) পূরণ করুন।' });
   }
 
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPhone = phone.trim();
+  const cleanPassword = (password || '').trim();
+
   const db = getDb();
+
+  // Check if email or phone already registered
+  const existingUser = db.users.find(
+    (u) =>
+      u.email.toLowerCase() === cleanEmail ||
+      u.phone === cleanPhone
+  );
+  if (existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'এই ইমেইল বা ফোন নম্বরে ইতিমধ্যে একটি অ্যাকাউন্ট আছে। অনুগ্রহ করে লগইন করুন।',
+    });
+  }
+
   const requestedRole = (role as UserRole) || 'buyer';
-  const isAutoApproved = requestedRole === 'buyer';
+
+  // SINGLE ADMIN RULE: Only ONE account can be admin!
+  if (requestedRole === 'admin') {
+    const existingAdmin = db.users.find((u) => u.role === 'admin');
+    if (existingAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: 'সিস্টেমে ইতিমধ্যে ১টি অ্যাডমিন অ্যাকাউন্ট নিবন্ধিত আছে। বাস্তব প্রোডাকশনে শুধুমাত্র ১টি অ্যাডমিন অ্যাকাউন্ট থাকতে পারবে।',
+      });
+    }
+  }
+
+  // Auto-approve buyer and first admin. Sellers and Staff can be approved or pending
+  const isAutoApproved = requestedRole === 'admin' || requestedRole === 'buyer' || requestedRole === 'seller';
 
   const newUserId = `user-${requestedRole}-${Date.now()}`;
+  let storeId: string | undefined = undefined;
+
+  if (requestedRole === 'seller') {
+    storeId = `store-${newUserId}`;
+    const newStore: Store = {
+      id: storeId,
+      userId: newUserId,
+      ownerName: name.trim(),
+      storeName: storeName?.trim() || `${name.trim()} এর ক্যাম্পাস স্টোর`,
+      bio: 'ঢাকা সেন্ট্রাল ইউনিভার্সিটি শিক্ষার্থী বিক্রেতা হাব।',
+      campusId: campusId as CampusId,
+      status: 'approved',
+      rating: 5.0,
+      totalSales: 0,
+      createdAt: new Date().toISOString(),
+    };
+    db.stores.push(newStore);
+  }
+
   const newUser: User = {
     id: newUserId,
-    name,
-    email,
-    phone,
+    name: name.trim(),
+    email: cleanEmail,
+    phone: cleanPhone,
+    password: cleanPassword || undefined,
     campusId: campusId as CampusId,
-    department: department || 'সাধারণ শিক্ষার্থী',
-    studentId: studentId || `ID-${Math.floor(1000 + Math.random() * 9000)}`,
+    department: department?.trim() || (requestedRole === 'admin' ? 'কেন্দ্রীয় মনিটরিং ও অ্যাডমিন সেল' : 'সাধারণ শিক্ষার্থী'),
+    studentId: studentId?.trim() || (requestedRole === 'admin' ? 'ADMIN-DCU-01' : `ID-${Math.floor(1000 + Math.random() * 9000)}`),
     role: requestedRole,
     approvalStatus: isAutoApproved ? 'approved' : 'pending',
+    storeId,
     assignedPickupPointId: pickupPointId || undefined,
     factoryName: factoryName || undefined,
     createdAt: new Date().toISOString(),
@@ -148,7 +235,7 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
       studentId: newUser.studentId,
       department: newUser.department,
       pickupPointId,
-      details: details || `${requestedRole} একাউন্টের জন্য আবেদন জমা হয়েছে।`,
+      details: details || `${requestedRole} অ্যাকাউন্টের জন্য আবেদন জমা হয়েছে।`,
       createdAt: new Date().toISOString(),
     };
     db.roleApplications.unshift(newApp);
@@ -162,6 +249,18 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
       details: `Application for ${requestedRole} role pending admin approval.`,
       timestamp: new Date().toISOString(),
     });
+  } else {
+    db.auditLogs.unshift({
+      id: `log-${Date.now()}`,
+      actorId: newUser.id,
+      actorName: newUser.name,
+      actorRole: newUser.role,
+      action: requestedRole === 'admin' ? 'FIRST_ADMIN_REGISTERED' : 'USER_REGISTERED',
+      details: requestedRole === 'admin'
+        ? `প্রথম ও একমাত্র সুপার অ্যাডমিন অ্যাকাউন্ট নিবন্ধিত হয়েছে (${newUser.name})।`
+        : `নতুন অ্যাকাউন্ট নিবন্ধিত হয়েছে (${newUser.name}, ${requestedRole})।`,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   saveDb(db);
@@ -170,7 +269,9 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
     user: newUser,
     isPendingApproval: !isAutoApproved,
     message: isAutoApproved
-      ? 'বায়ার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!'
+      ? (requestedRole === 'admin'
+          ? 'সুপার অ্যাডমিন অ্যাকাউন্ট সফলভাবে নিবন্ধিত হয়েছে!'
+          : 'অ্যাকাউন্ট সফলভাবে নিবন্ধিত ও সক্রিয় হয়েছে!')
       : 'আপনার আবেদন জমা নেওয়া হয়েছে! অ্যাডমিন অনুমোদন দেওয়ার পর এই অ্যাকাউন্ট সক্রিয় হবে।',
   });
 });
@@ -514,13 +615,13 @@ apiRouter.patch('/orders/:id/runner-pickup', (req: Request, res: Response) => {
 
   order.status = 'in_runner_custody';
   order.currentCustody = 'delivery_runner';
-  order.deliveryManId = runnerId || 'user-delivery-1';
-  order.deliveryManName = runnerName || 'সাব্বির আহমেদ (রানার)';
+  order.deliveryManId = runnerId || (req.headers['x-user-id'] as string) || '';
+  order.deliveryManName = runnerName || 'ক্যাম্পাস রানার';
 
   order.custodyHistory.push({
     fromHolder: 'factory',
     toHolder: 'delivery_runner',
-    actorName: order.deliveryManName || 'সাব্বির আহমেদ (রানার)',
+    actorName: order.deliveryManName || 'ক্যাম্পাস রানার',
     actorRole: 'delivery_man',
     timestamp: new Date().toISOString(),
     transferCode: `RUNNER-PICKUP-${order.id}`,
@@ -541,13 +642,13 @@ apiRouter.patch('/orders/:id/booth-receive', (req: Request, res: Response) => {
 
   order.status = 'ready_for_pickup';
   order.currentCustody = 'pickup_staff';
-  order.pickupStaffId = staffId || 'user-pickup-1';
-  order.pickupStaffName = staffName || 'মেহেদী হাসান (বুথ কর্মী)';
+  order.pickupStaffId = staffId || (req.headers['x-user-id'] as string) || '';
+  order.pickupStaffName = staffName || 'ক্যাম্পাস বুথ কর্মী';
 
   order.custodyHistory.push({
     fromHolder: 'delivery_runner',
     toHolder: 'pickup_staff',
-    actorName: order.pickupStaffName || 'মেহেদী হাসান (বুথ কর্মী)',
+    actorName: order.pickupStaffName || 'ক্যাম্পাস বুথ কর্মী',
     actorRole: 'pickup_staff',
     timestamp: new Date().toISOString(),
     transferCode: `BOOTH-RCV-${order.id}`,
@@ -653,7 +754,10 @@ apiRouter.get('/admin/metrics', (_req: Request, res: Response) => {
 
 // Favorites
 apiRouter.get('/favorites', (req: Request, res: Response) => {
-  const userId = (req.headers['x-user-id'] as string) || 'user-buyer-1';
+  const userId = req.headers['x-user-id'] as string;
+  if (!userId) {
+    return res.json({ success: true, productIds: [], products: [] });
+  }
   const db = getDb();
   const favoriteIds = db.favorites[userId] || [];
   const favoriteProducts = db.products.filter((p) => favoriteIds.includes(p.id));
@@ -661,7 +765,10 @@ apiRouter.get('/favorites', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/favorites/toggle', (req: Request, res: Response) => {
-  const userId = (req.headers['x-user-id'] as string) || 'user-buyer-1';
+  const userId = req.headers['x-user-id'] as string;
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'পছন্দের তালিকায় রাখতে অনুগ্রহ করে লগইন করুন।' });
+  }
   const { productId } = req.body;
   const db = getDb();
 

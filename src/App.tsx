@@ -44,7 +44,7 @@ import {
 
 function CampusShopApp() {
   const { lang, t } = useLanguage();
-  const { user, role, openApplyRole } = useAuth();
+  const { user, role, openApplyRole, openAuthModal } = useAuth();
   const { openCheckout, addToCart } = useCart();
 
   const [campuses, setCampuses] = useState<Campus[]>([]);
@@ -312,20 +312,40 @@ function CampusShopApp() {
               <div className="bg-white rounded-3xl border border-stone-200 p-8 sm:p-12 text-center my-6 shadow-xs">
                 <Package className="w-12 h-12 text-stone-300 mx-auto mb-3" />
                 <h3 className="text-base font-bold text-stone-800">
-                  {lang === 'bn' ? 'কোনো পণ্য পাওয়া যায়নি' : 'No products found'}
+                  {searchQuery ? 'কোনো পণ্য পাওয়া যায়নি' : 'এখনো কোনো পণ্য লিস্টিং করা হয়নি'}
                 </h3>
-                <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
-                  অন্য কোনো কীওয়ার্ড দিয়ে সার্চ করুন অথবা ফিল্টার রিসেট করুন।
+                <p className="text-xs text-stone-500 mt-1 max-w-md mx-auto leading-relaxed">
+                  {searchQuery
+                    ? 'অন্য কোনো কীওয়ার্ড দিয়ে সার্চ করুন অথবা ফিল্টার রিসেট করুন।'
+                    : 'ক্যাম্পাসের বন্ধুদের মাঝে বই, হ্যান্ডনোট বা গ্যাজেট বিক্রি করতে প্রথমে রেজিস্ট্রেশন করে সেলার হিসেবে পণ্য যুক্ত করুন।'}
                 </p>
-                <button
-                  onClick={() => {
-                    setSelectedCondition('all');
-                    setSearchQuery('');
-                  }}
-                  className="mt-4 px-4 py-2 text-xs font-bold rounded-xl bg-[#0D5C3A] text-white hover:bg-[#09432a] transition-colors"
-                >
-                  সকল ফিল্টার রিসেট করুন
-                </button>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        openAuthModal('register');
+                      } else if (role === 'seller') {
+                        setIsSellerHubOpen(true);
+                      } else {
+                        openApplyRole('seller');
+                      }
+                    }}
+                    className="px-5 py-2.5 text-xs font-bold rounded-xl bg-[#0D5C3A] text-white hover:bg-[#09432a] transition-all shadow-xs cursor-pointer"
+                  >
+                    নতুন পণ্য বিক্রি করুন
+                  </button>
+                  {searchQuery && (
+                    <button
+                      onClick={() => {
+                        setSelectedCondition('all');
+                        setSearchQuery('');
+                      }}
+                      className="px-4 py-2 text-xs font-bold rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 cursor-pointer"
+                    >
+                      ফিল্টার রিসেট করুন
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
