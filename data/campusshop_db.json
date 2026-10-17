@@ -1,0 +1,498 @@
+{
+  "users": [
+    {
+      "id": "user-buyer-1",
+      "name": "রাফিকুল ইসলাম",
+      "email": "rafiqul@student.dcu.edu.bd",
+      "phone": "01711223344",
+      "role": "buyer",
+      "approvalStatus": "approved",
+      "campusId": "dhaka-college",
+      "studentId": "DC-2023-ENG-402",
+      "department": "ইংরেজি বিভাগ (৩য় বর্ষ)",
+      "linkedAccountIds": [
+        "user-seller-rafiqul"
+      ],
+      "createdAt": "2026-02-10T10:00:00Z"
+    },
+    {
+      "id": "user-seller-1",
+      "name": "তানজিনা আক্তার",
+      "email": "tanzina@student.dcu.edu.bd",
+      "phone": "01822334455",
+      "role": "seller",
+      "approvalStatus": "approved",
+      "campusId": "eden-college",
+      "studentId": "EMC-2022-ECO-109",
+      "department": "অর্থনীতি বিভাগ (৪র্থ বর্ষ)",
+      "storeId": "store-eden-books",
+      "linkedAccountIds": [
+        "user-buyer-tanzina"
+      ],
+      "createdAt": "2026-01-15T09:30:00Z"
+    },
+    {
+      "id": "user-buyer-tanzina",
+      "name": "তানজিনা আক্তার (বায়ার প্রোফাইল)",
+      "email": "tanzina@student.dcu.edu.bd",
+      "phone": "01822334455",
+      "role": "buyer",
+      "approvalStatus": "approved",
+      "campusId": "eden-college",
+      "studentId": "EMC-2022-ECO-109",
+      "department": "অর্থনীতি বিভাগ (৪র্থ বর্ষ)",
+      "linkedAccountIds": [
+        "user-seller-1"
+      ],
+      "createdAt": "2026-01-15T09:30:00Z"
+    },
+    {
+      "id": "user-pickup-1",
+      "name": "মেহেদী হাসান (পিকআপ পয়েন্ট কর্মী)",
+      "email": "mehedi.pickup@dcu.edu.bd",
+      "phone": "01611223388",
+      "role": "pickup_staff",
+      "approvalStatus": "approved",
+      "campusId": "dhaka-college",
+      "assignedPickupPointId": "dc-main-gate",
+      "department": "ঢাকা কলেজ প্রধান ফটক স্টুডেন্ট ডেলিভারি বুথ",
+      "createdAt": "2026-01-25T10:00:00Z"
+    },
+    {
+      "id": "user-delivery-1",
+      "name": "সাব্বির আহমেদ (ক্যাম্পাস ডেলিভারি ম্যান)",
+      "email": "sabbir.runner@dcu.edu.bd",
+      "phone": "01799887766",
+      "role": "delivery_man",
+      "approvalStatus": "approved",
+      "campusId": "dhaka-college",
+      "studentId": "DC-2022-HIST-310",
+      "department": "ক্যাম্পাস ইন্টার-কলেজ এক্সপ্রেস রানার",
+      "createdAt": "2026-02-01T08:00:00Z"
+    },
+    {
+      "id": "user-factory-1",
+      "name": "ফয়সাল কবীর (মার্চেন্ডাইজ ফ্যাক্টরি ইনচার্জ)",
+      "email": "foysal.factory@dcu.edu.bd",
+      "phone": "01911447722",
+      "role": "factory_staff",
+      "approvalStatus": "approved",
+      "campusId": "titumir-college",
+      "factoryName": "সেন্ট্রাল ইউনিভার্সিটি মার্চ অ্যান্ড অ্যাপারেল ফ্যাক্টরি",
+      "department": "টেক্সটাইল ও ব্যাচ প্রিন্টিং ইউনিট",
+      "createdAt": "2026-01-10T09:00:00Z"
+    },
+    {
+      "id": "user-admin-1",
+      "name": "ড. মোজাম্মেল হক (কেন্দ্রীয় অ্যাডমিন)",
+      "email": "admin@campusshop.dcu.edu.bd",
+      "phone": "01511223300",
+      "role": "admin",
+      "approvalStatus": "approved",
+      "campusId": "dhaka-college",
+      "studentId": "ADMIN-DCU-01",
+      "department": "কেন্দ্রীয় মনিটরিং ও প্রক্টরিয়াল টিম",
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "store-eden-books",
+      "userId": "user-seller-1",
+      "ownerName": "তানজিনা আক্তার",
+      "storeName": "ইডেন বুক নেস্ট (Eden Book Nest)",
+      "bio": "অনার্স ১ম থেকে ৪র্থ বর্ষের অর্থনীতি ও মানবিক অনুষদের একাডেমিক মূল বই, হ্যান্ডনোট ও প্রশ্নব্যাংক সাশ্রয়ী মূল্যে।",
+      "campusId": "eden-college",
+      "status": "approved",
+      "rating": 4.9,
+      "totalSales": 47,
+      "createdAt": "2026-01-16T10:00:00Z"
+    },
+    {
+      "id": "store-titumir-gadgets",
+      "userId": "user-factory-1",
+      "ownerName": "ফয়সাল কবীর",
+      "storeName": "সেন্ট্রাল মার্চ অ্যান্ড গিয়ার হাব",
+      "bio": "বিশ্ববিদ্যালয় অনুমোদিত প্রিমিয়াম হুডি, জার্সি, সাইন্টিফিক ক্যালকুলেটর ও ব্যাচ মার্চেন্ডাইজ।",
+      "campusId": "titumir-college",
+      "status": "approved",
+      "rating": 4.9,
+      "totalSales": 68,
+      "createdAt": "2026-01-22T14:00:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "storeId": "store-eden-books",
+      "sellerId": "user-seller-1",
+      "sellerName": "তানজিনা আক্তার",
+      "sellerPhone": "01822334455",
+      "campusId": "eden-college",
+      "title": "অনার্স ৩য় বর্ষের মাইক্রোইকোনমিক্স ও ম্যাক্রোইকোনমিক্স কম্বো সেট",
+      "titleEn": "Economics 3rd Year Textbook & Guide Combo",
+      "description": "অনার্স ৩য় বর্ষের অর্থনীতি বিভাগের মূল দুটি টেক্সটবুক। বইগুলোতে কোনো দাগ নেই, একদম নতুনের মতো ফ্রেশ। সাথে সম্পূর্ণ সেমিস্টারের লেকচার হ্যান্ডনোট ফ্রি পাবেন।",
+      "category": "books",
+      "condition": "like_new",
+      "price": 380,
+      "originalPrice": 650,
+      "stockQuantity": 4,
+      "images": [
+        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+      ],
+      "isNegotiable": true,
+      "isAvailable": true,
+      "viewsCount": 142,
+      "pickupPointIds": [
+        "eden-gate-2",
+        "eden-bokultola",
+        "eden-canteen"
+      ],
+      "department": "অর্থনীতি বিভাগ",
+      "rating": 4.9,
+      "reviewCount": 12,
+      "createdAt": "2026-02-15T10:00:00Z"
+    },
+    {
+      "id": "prod-2",
+      "storeId": "store-titumir-gadgets",
+      "sellerId": "user-factory-1",
+      "sellerName": "সেন্ট্রাল মার্চ ফ্যাক্টরি",
+      "sellerPhone": "01911447722",
+      "campusId": "titumir-college",
+      "title": "অফিসিয়াল ক্যাম্পাস উইন্টার হুডি - ডিপ গ্রিন অ্যান্ড গোল্ড (ফ্যাক্টরি ব্যাচ)",
+      "titleEn": "Official Campus Winter Hoodie - Deep Green & Gold",
+      "description": "৩৫০ জিএসএম প্রিমিয়াম কটন ফ্লিচ ফ্যাব্রিক। সেন্ট্রাল টেক্সটাইল ফ্যাক্টরিতে নিজস্ব কাটিং ও গোল্ডেন অ্যাম্ব্রয়ডারি। সাইজ: M, L, XL পাওয়া যাবে।",
+      "category": "clothing",
+      "condition": "new",
+      "price": 650,
+      "originalPrice": 850,
+      "stockQuantity": 24,
+      "images": [
+        "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg"
+      ],
+      "isNegotiable": false,
+      "isAvailable": true,
+      "viewsCount": 310,
+      "pickupPointIds": [
+        "titumir-shaheed-minar",
+        "dc-main-gate",
+        "eden-gate-2"
+      ],
+      "department": "মার্চেন্ডাইজ ও ফ্যাক্টরি প্রোডাকশন",
+      "isFactoryManufactured": true,
+      "productionBatchId": "BATCH-2026-W04",
+      "rating": 5,
+      "reviewCount": 19,
+      "createdAt": "2026-02-20T12:00:00Z"
+    },
+    {
+      "id": "prod-3",
+      "storeId": "store-eden-books",
+      "sellerId": "user-seller-1",
+      "sellerName": "তানজিনা আক্তার",
+      "sellerPhone": "01822334455",
+      "campusId": "eden-college",
+      "title": "বিসিএস ও সরকারি চাকরি প্রস্তুতি - আন্তর্জাতিক বিষয়াবলী হ্যান্ডনোট",
+      "titleEn": "BCS & Govt Job Preparation - International Affairs Note",
+      "description": "বিসিএস প্রিলিমিনারি ও লিখিত পরীক্ষার জন্য বিগত ১০ বছরের গুরুত্বপূর্ণ টপিক ও মানচিত্র ভিত্তিক এক্সক্লুসিভ নোট। সম্পূর্ণ স্পাইরাল বাইন্ডিং করা।",
+      "category": "notes",
+      "condition": "new",
+      "price": 180,
+      "originalPrice": 280,
+      "stockQuantity": 10,
+      "images": [
+        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+      ],
+      "isNegotiable": false,
+      "isAvailable": true,
+      "viewsCount": 220,
+      "pickupPointIds": [
+        "eden-gate-2",
+        "eden-canteen"
+      ],
+      "department": "বিসিএস স্টাডি সার্কেল",
+      "rating": 4.8,
+      "reviewCount": 8,
+      "createdAt": "2026-02-25T14:30:00Z"
+    },
+    {
+      "id": "prod-4",
+      "storeId": "store-titumir-gadgets",
+      "sellerId": "user-factory-1",
+      "sellerName": "ফয়সাল কবীর",
+      "sellerPhone": "01911447722",
+      "campusId": "titumir-college",
+      "title": "ক্যাসিও FX-991ES Plus অরিজিনাল সাইন্টিফিক ক্যালকুলেটর",
+      "titleEn": "Casio FX-991ES Plus Scientific Calculator (Original)",
+      "description": "১ বছর সায়েন্স বিভাগে ব্যবহৃত হয়েছে। ব্যাটারি ব্যাকআপ চমৎকার, কভার সহ ১০০% সচল ও নিখুঁত। ম্যাথ ও ফিজিক্সের শিক্ষার্থীদের জন্য উপযুক্ত।",
+      "category": "electronics",
+      "condition": "used_good",
+      "price": 750,
+      "originalPrice": 1650,
+      "stockQuantity": 2,
+      "images": [
+        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+      ],
+      "isNegotiable": true,
+      "isAvailable": true,
+      "viewsCount": 188,
+      "pickupPointIds": [
+        "titumir-shaheed-minar",
+        "dc-main-gate"
+      ],
+      "department": "পদার্থবিজ্ঞান বিভাগ",
+      "rating": 4.7,
+      "reviewCount": 5,
+      "createdAt": "2026-03-01T09:00:00Z"
+    },
+    {
+      "id": "prod-5",
+      "storeId": "store-eden-books",
+      "sellerId": "user-seller-1",
+      "sellerName": "তানজিনা আক্তার",
+      "sellerPhone": "01822334455",
+      "campusId": "dhaka-college",
+      "title": "ইংরেজি সাহিত্যের ক্লাসিক ট্র্যাজেডি ও রোমান্টিক কবিতা সংগ্রহ",
+      "titleEn": "English Literature Classic Tragedies & Poetry Anthology",
+      "description": "শেলে, কিটস, ওয়ার্ডসওয়ার্থ এবং শেক্সপিয়রের নির্বাচিত নাটক ও কবিতা। ডিগ্রি ও অনার্স ১ম/২য় বর্ষের সহায়ক। পেন্সিলের গুরুত্বপূর্ণ নোট চিহ্নিত আছে।",
+      "category": "books",
+      "condition": "used_good",
+      "price": 240,
+      "originalPrice": 480,
+      "stockQuantity": 3,
+      "images": [
+        "/src/assets/images/academic_textbooks_1792159211354.jpg"
+      ],
+      "isNegotiable": true,
+      "isAvailable": true,
+      "viewsCount": 95,
+      "pickupPointIds": [
+        "dc-main-gate",
+        "dc-library"
+      ],
+      "department": "ইংরেজি বিভাগ",
+      "rating": 5,
+      "reviewCount": 3,
+      "createdAt": "2026-03-05T16:00:00Z"
+    },
+    {
+      "id": "prod-6",
+      "storeId": "store-titumir-gadgets",
+      "sellerId": "user-factory-1",
+      "sellerName": "সেন্ট্রাল মার্চ ফ্যাক্টরি",
+      "sellerPhone": "01911447722",
+      "campusId": "dhaka-college",
+      "title": "ঢাকা কলেজ স্পোর্টস এডিশন জার্সি - এমারেল্ড গ্রিন (ফ্যাক্টরি তৈরি)",
+      "titleEn": "Dhaka College Sports Edition Jersey",
+      "description": "ব্রিদেবল ড্রাই-ফিট ফেব্রিক, ডিপ গ্রিন ও গোল্ডেন স্ট্রাইপ। কেন্দ্রীয় ফ্যাক্টরি ব্যাচ। ক্যাম্পাস টুর্নামেন্ট ও দৈনন্দিন ব্যবহারের জন্য আরামদায়ক।",
+      "category": "clothing",
+      "condition": "new",
+      "price": 320,
+      "originalPrice": 450,
+      "stockQuantity": 15,
+      "images": [
+        "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg"
+      ],
+      "isNegotiable": false,
+      "isAvailable": true,
+      "viewsCount": 260,
+      "pickupPointIds": [
+        "dc-main-gate",
+        "dc-auditorium"
+      ],
+      "department": "স্পোর্টস ক্লাব",
+      "isFactoryManufactured": true,
+      "productionBatchId": "BATCH-2026-J02",
+      "rating": 4.9,
+      "reviewCount": 14,
+      "createdAt": "2026-03-08T11:20:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "CS-2026-101",
+      "buyerId": "user-buyer-1",
+      "buyerName": "রাফিকুল ইসলাম",
+      "buyerPhone": "01711223344",
+      "buyerCampusId": "dhaka-college",
+      "sellerId": "user-seller-1",
+      "sellerName": "তানজিনা আক্তার",
+      "storeId": "store-eden-books",
+      "items": [
+        {
+          "productId": "prod-1",
+          "productTitle": "অনার্স ৩য় বর্ষের মাইক্রোইকোনমিক্স ও ম্যাক্রোইকোনমিক্স কম্বো সেট",
+          "unitPrice": 380,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/academic_textbooks_1792159211354.jpg",
+          "storeId": "store-eden-books"
+        }
+      ],
+      "totalAmount": 380,
+      "paymentMethod": "cash_on_pickup",
+      "paymentStatus": "unpaid",
+      "campusId": "dhaka-college",
+      "pickupPointId": "dc-main-gate",
+      "pickupPointName": "কলেজের প্রধান ফটক বুথ (Main Gate Booth)",
+      "preferredDateTime": "আজ দুপুর ২:০০",
+      "notes": "ক্লাস শেষ করে মূল গেটের বুথে আসব।",
+      "status": "ready_for_pickup",
+      "deliveryManId": "user-delivery-1",
+      "deliveryManName": "সাব্বির আহমেদ",
+      "pickupStaffId": "user-pickup-1",
+      "pickupStaffName": "মেহেদী হাসান",
+      "handoverOtp": "4821",
+      "createdAt": "2026-03-12T11:00:00Z"
+    },
+    {
+      "id": "CS-2026-102",
+      "buyerId": "user-buyer-1",
+      "buyerName": "রাফিকুল ইসলাম",
+      "buyerPhone": "01711223344",
+      "buyerCampusId": "dhaka-college",
+      "sellerId": "user-factory-1",
+      "sellerName": "সেন্ট্রাল মার্চ ফ্যাক্টরি",
+      "storeId": "store-titumir-gadgets",
+      "items": [
+        {
+          "productId": "prod-2",
+          "productTitle": "অফিসিয়াল ক্যাম্পাস উইন্টার হুডি - ডিপ গ্রিন অ্যান্ড গোল্ড",
+          "unitPrice": 650,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg",
+          "storeId": "store-titumir-gadgets"
+        }
+      ],
+      "totalAmount": 650,
+      "paymentMethod": "bkash",
+      "paymentStatus": "verified",
+      "transactionId": "BK9A772X41",
+      "senderPhone": "01711223344",
+      "campusId": "dhaka-college",
+      "pickupPointId": "dc-main-gate",
+      "pickupPointName": "কলেজের প্রধান ফটক বুথ (Main Gate Booth)",
+      "preferredDateTime": "আগামীকাল দুপুর ১:৩০",
+      "notes": "বিকাশ করা হয়েছে।",
+      "status": "in_transit",
+      "deliveryManId": "user-delivery-1",
+      "deliveryManName": "সাব্বির আহমেদ",
+      "handoverOtp": "9134",
+      "createdAt": "2026-03-13T09:30:00Z"
+    },
+    {
+      "id": "CS-2026-103",
+      "buyerId": "user-buyer-1",
+      "buyerName": "রাফিকুল ইসলাম",
+      "buyerPhone": "01711223344",
+      "buyerCampusId": "dhaka-college",
+      "sellerId": "user-factory-1",
+      "sellerName": "সেন্ট্রাল মার্চ ফ্যাক্টরি",
+      "storeId": "store-titumir-gadgets",
+      "items": [
+        {
+          "productId": "prod-6",
+          "productTitle": "ঢাকা কলেজ স্পোর্টস এডিশন জার্সি - এমারেল্ড গ্রিন",
+          "unitPrice": 320,
+          "quantity": 2,
+          "imageUrl": "/src/assets/images/campus_varsity_hoodie_1792159209809.jpg",
+          "storeId": "store-titumir-gadgets"
+        }
+      ],
+      "totalAmount": 640,
+      "paymentMethod": "cash_on_pickup",
+      "paymentStatus": "unpaid",
+      "campusId": "dhaka-college",
+      "pickupPointId": "dc-main-gate",
+      "pickupPointName": "কলেজের প্রধান ফটক বুথ (Main Gate Booth)",
+      "preferredDateTime": "পরশু দুপুর ১২:০০",
+      "status": "in_production",
+      "handoverOtp": "6712",
+      "createdAt": "2026-03-14T14:15:00Z"
+    }
+  ],
+  "favorites": {
+    "user-buyer-1": [
+      "prod-2",
+      "prod-6"
+    ]
+  },
+  "reviews": [
+    {
+      "id": "rev-1",
+      "orderId": "CS-2026-098",
+      "productId": "prod-2",
+      "buyerId": "user-buyer-1",
+      "buyerName": "রাফিকুল ইসলাম",
+      "sellerId": "user-factory-1",
+      "rating": 5,
+      "comment": "ফ্যাক্টরি তৈরি হুডির কোয়ালিটি অনেক ভালো! কাপড় বেশ পুরু ও আরামদায়ক। মূল গেটের পিকআপ বুথ থেকে ঝামেলা ছাড়াই নিয়েছি।",
+      "createdAt": "2026-03-10T17:00:00Z"
+    }
+  ],
+  "roleApplications": [
+    {
+      "id": "app-1",
+      "userId": "user-pending-1",
+      "userName": "জাহিদ হাসান",
+      "userEmail": "zahid@student.dcu.edu.bd",
+      "userPhone": "01755667788",
+      "requestedRole": "seller",
+      "status": "pending",
+      "campusId": "titumir-college",
+      "studentId": "GTC-2023-BBA-104",
+      "department": "ব্যবসায় শিক্ষা অনুষদ",
+      "details": "পুরাতন বই ও সেমিস্টার সাজেশন বিক্রির জন্য বিক্রেতা একাউন্ট খুলতে চাই।",
+      "createdAt": "2026-03-13T12:00:00Z"
+    },
+    {
+      "id": "app-2",
+      "userId": "user-pending-2",
+      "userName": "মোস্তাফিজুর রহমান",
+      "userEmail": "mostafiz@student.dcu.edu.bd",
+      "userPhone": "01899112233",
+      "requestedRole": "delivery_man",
+      "status": "pending",
+      "campusId": "kabi-nazrul-college",
+      "studentId": "KNGC-2022-MATH-089",
+      "department": "গণিত বিভাগ",
+      "details": "পুরান ঢাকা (কবি নজরুল ও সোহরাওয়ার্দী কলেজ) ক্যাম্পাসের ডেলিভারি রানার হিসেবে কাজ করতে আগ্রহী।",
+      "createdAt": "2026-03-14T10:00:00Z"
+    },
+    {
+      "id": "app-3",
+      "userId": "user-pending-3",
+      "userName": "নুসরাত জাহান",
+      "userEmail": "nusrat@student.dcu.edu.bd",
+      "userPhone": "01722883311",
+      "requestedRole": "pickup_staff",
+      "status": "pending",
+      "campusId": "eden-college",
+      "pickupPointId": "eden-gate-2",
+      "studentId": "EMC-2023-SOC-210",
+      "department": "সমাজবিজ্ঞান বিভাগ",
+      "details": "ইডেন মহিলা কলেজের ২ নম্বর গেট বুথে পিকআপ পয়েন্ট কর্মী হিসেবে দায়িত্ব পালন করতে চাই।",
+      "createdAt": "2026-03-14T16:30:00Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log-1",
+      "actorId": "user-admin-1",
+      "actorName": "ড. মোজাম্মেল হক",
+      "actorRole": "admin",
+      "action": "APPROVE_ROLE",
+      "details": "Approved seller role for Tanzina Akhter",
+      "timestamp": "2026-01-16T10:05:00Z"
+    },
+    {
+      "id": "log-2",
+      "actorId": "user-admin-1",
+      "actorName": "ড. মোজাম্মেল হক",
+      "actorRole": "admin",
+      "action": "APPROVE_ROLE",
+      "details": "Approved pickup_staff role for Mehedi Hasan at Dhaka College Main Gate",
+      "timestamp": "2026-01-25T10:15:00Z"
+    }
+  ]
+}
