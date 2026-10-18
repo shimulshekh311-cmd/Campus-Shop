@@ -128,7 +128,7 @@ export const TrackingPage: React.FC<TrackingPageProps> = ({
   const currentStep = searchedOrder ? getStepProgress(searchedOrder.status) : 1;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 w-full overflow-x-clip">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 mb-4">
         <button

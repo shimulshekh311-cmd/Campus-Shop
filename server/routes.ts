@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Router, Request, Response } from 'express';
 import {
   CAMPUSES,
@@ -810,4 +812,59 @@ apiRouter.post('/reviews', (req: Request, res: Response) => {
   order.hasReviewed = true;
   saveDb(db);
   res.json({ success: true, review: newReview });
+});
+
+// Logo Settings
+apiRouter.get('/settings/logo', (_req: Request, res: Response) => {
+  const db = getDb() as any;
+  res.json({
+    success: true,
+    logoUrl: db.customLogo || '/images/campus_shop_logo.jpg',
+  });
+});
+
+apiRouter.post('/settings/logo', (req: Request, res: Response) => {
+  const { imageData } = req.body;
+  if (!imageData || typeof imageData !== 'string') {
+    return res.status(400).json({ success: false, message: 'ইমেজ ডাটা পাওয়া যায়নি।' });
+  }
+
+  const db = getDb() as any;
+  db.customLogo = imageData;
+  saveDb(db);
+
+  // If base64 data URL, also write to public folder for static serving
+  if (imageData.startsWith('data:image/')) {
+    try {
+      const match = imageData.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+      if (match) {
+        const base64Data = match[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+        const targetDir = path.resolve(process.cwd(), 'public', 'images');
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+        fs.writeFileSync(path.join(targetDir, 'campus_shop_logo.jpg'), buffer);
+        fs.writeFileSync(path.resolve(process.cwd(), 'public', 'campus_shop_logo.jpg'), buffer);
+
+        // Also update dist if it exists
+        const distDir = path.resolve(process.cwd(), 'dist', 'images');
+        if (fs.existsSync(distDir)) {
+          fs.writeFileSync(path.join(distDir, 'campus_shop_logo.jpg'), buffer);
+        }
+        const distRootLogo = path.resolve(process.cwd(), 'dist', 'campus_shop_logo.jpg');
+        if (fs.existsSync(path.resolve(process.cwd(), 'dist'))) {
+          fs.writeFileSync(distRootLogo, buffer);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to save logo to disk:', e);
+    }
+  }
+
+  res.json({
+    success: true,
+    logoUrl: imageData,
+    message: 'লোগো সফলভাবে আপডেট হয়েছে।',
+  });
 });

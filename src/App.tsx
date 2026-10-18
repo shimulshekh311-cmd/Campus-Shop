@@ -73,12 +73,18 @@ function CampusShopApp() {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [reviewOrder, setReviewOrder] = useState<Order | null>(null);
 
-  // Load campuses and products from backend API
+  // Logo management (persistent custom logo)
+  const [logoUrl, setLogoUrl] = useState<string>(() => {
+    return localStorage.getItem('campusshop_custom_logo') || '/images/campus_shop_logo.jpg';
+  });
+
+  // Load campuses, products, and logo from backend API
   const fetchAllData = async () => {
     try {
-      const [campRes, prodRes] = await Promise.all([
+      const [campRes, prodRes, logoRes] = await Promise.all([
         fetch('/api/campuses'),
         fetch('/api/products'),
+        fetch('/api/settings/logo').catch(() => null),
       ]);
       const [campData, prodData] = await Promise.all([
         campRes.json(),
@@ -87,10 +93,32 @@ function CampusShopApp() {
 
       if (campData.success) setCampuses(campData.campuses);
       if (prodData.success) setProducts(prodData.products);
+
+      if (logoRes) {
+        const logoData = await logoRes.json();
+        if (logoData && logoData.success && logoData.logoUrl) {
+          setLogoUrl(logoData.logoUrl);
+          localStorage.setItem('campusshop_custom_logo', logoData.logoUrl);
+        }
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdateLogo = async (newLogoData: string) => {
+    setLogoUrl(newLogoData);
+    localStorage.setItem('campusshop_custom_logo', newLogoData);
+    try {
+      await fetch('/api/settings/logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: newLogoData }),
+      });
+    } catch (err) {
+      console.warn('Could not sync logo with server:', err);
     }
   };
 
@@ -171,7 +199,7 @@ function CampusShopApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBF9F4] text-stone-900 pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col bg-[#FBF9F4] text-stone-900 pb-16 md:pb-0 w-full max-w-full overflow-x-hidden">
       
       {/* 1. Navbar with the exact 5 Tabs: হোম, ক্যাটাগরি, অর্ডার, ট্রাকিং, একাউন্ট */}
       <Navbar
@@ -189,11 +217,13 @@ function CampusShopApp() {
         selectedCampus={selectedCampus}
         onSelectCampus={setSelectedCampus}
         activeTab={activeTab}
+        logoUrl={logoUrl}
+        onUpdateLogo={handleUpdateLogo}
       />
 
       {/* 2. Standalone Page Routing (আলাদা পেজ) */}
       {activeTab === 'orders' && (
-        <main className="flex-1">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 overflow-x-clip">
           <OrdersPage
             onGoHome={handleGoHome}
             onGoTracking={(orderId) => handleOpenTracking(orderId)}
@@ -203,7 +233,7 @@ function CampusShopApp() {
       )}
 
       {activeTab === 'tracking' && (
-        <main className="flex-1">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 overflow-x-clip">
           <TrackingPage
             onGoHome={handleGoHome}
             initialOrderId={trackingOrderId}
@@ -213,7 +243,7 @@ function CampusShopApp() {
       )}
 
       {activeTab === 'account' && (
-        <main className="flex-1">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 overflow-x-clip">
           <AccountPage
             onGoHome={handleGoHome}
             onGoOrders={handleOpenOrders}
@@ -231,7 +261,7 @@ function CampusShopApp() {
 
       {/* 3. Category Tab View (আলাদা পেজ ও ক্যাটাগরি কার্ডসমূহ) */}
       {activeTab === 'category' && (
-        <main className="flex-1">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 overflow-x-clip">
           <CategoryPage
             onGoHome={handleGoHome}
             products={products}
@@ -243,7 +273,7 @@ function CampusShopApp() {
 
       {/* 4. Home Tab View: সরাসরি সার্চ ফিল্টার ও পণ্যসমূহ */}
       {activeTab === 'home' && (
-        <main id="catalog" className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-7">
+        <main id="catalog" className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 py-5 sm:py-7 overflow-x-clip">
           
           {/* Filter & Search Bar */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5">
@@ -367,32 +397,26 @@ function CampusShopApp() {
           "ফুটারে এত কিছু দেখানোর দরকার নাই। শুধু দেখাবে লোগো ট্যাগলাইন আর নিচের বাক্যটি
           'ঢাকা সেন্ট্রাল ইউনিভার্সিটির সাধারণ শিক্ষার্থীদের স্বাধীন ও উন্মুক্ত কমিউনিটি মার্কেটপ্লেস।'"
       */}
-      <footer className="bg-white border-t border-stone-200 py-6 text-center text-stone-600">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center gap-2">
+      <footer className="bg-white border-t border-stone-200 py-6 text-center text-stone-600 w-full overflow-x-clip">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center gap-3">
           
           {/* Logo & Tagline */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#0D5C3A] flex items-center justify-center text-white">
-              <svg
-                className="w-4 h-4 text-amber-300"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-emerald-900/10 shadow-2xs shrink-0">
+              <img
+                src={logoUrl || "/images/campus_shop_logo.jpg"}
+                alt="CampusShop Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <span className="text-base font-bold text-[#0D5C3A]">
-              CampusShop (ক্যাম্পাসশপ)
-            </span>
-            <span className="text-xs text-stone-400">·</span>
-            <span className="text-xs text-stone-500 font-medium">
-              ৭ ক্যাম্পাস অনলাইন মার্কেটপ্লেস
-            </span>
+            <div className="text-left">
+              <span className="text-sm sm:text-base font-black text-[#0D5C3A] leading-none block">
+                CampusShop (ক্যাম্পাসশপ)
+              </span>
+              <span className="text-[11px] sm:text-xs text-stone-600 font-medium block mt-1">
+                ক্যাম্পাসের সকল প্রয়োজন এক জায়গায়
+              </span>
+            </div>
           </div>
 
           {/* Exact sentence requested by user */}

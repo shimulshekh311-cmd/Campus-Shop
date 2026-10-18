@@ -17,11 +17,13 @@ import {
   Factory,
   ArrowRightLeft,
   UserPlus,
+  Camera,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useCart } from '../context/CartContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { CampusId, UserRole } from '../types/index.ts';
+import { LogoUploadModal } from './LogoUploadModal.tsx';
 
 interface NavbarProps {
   onGoHome: () => void;
@@ -38,6 +40,8 @@ interface NavbarProps {
   selectedCampus: CampusId | 'all';
   onSelectCampus: (campusId: CampusId | 'all') => void;
   activeTab?: 'home' | 'category' | 'orders' | 'tracking' | 'account';
+  logoUrl?: string;
+  onUpdateLogo?: (newLogo: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -52,7 +56,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPickupStaffDashboard,
   onOpenDeliveryRunnerDashboard,
   onOpenFactoryDashboard,
+  selectedCampus,
+  onSelectCampus,
   activeTab = 'home',
+  logoUrl,
+  onUpdateLogo,
 }) => {
   const {
     user,
@@ -67,6 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { cartCount, openCart, favorites } = useCart();
   const { lang, toggleLang, t } = useLanguage();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
   const getRoleDisplayName = (r: UserRole | 'guest') => {
     switch (r) {
@@ -109,41 +118,50 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Top Header Navbar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 md:gap-8">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 w-full overflow-x-clip">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 md:gap-8 min-w-0">
           
           {/* 1. Brand Logo & University Title */}
-          <button
-            type="button"
-            onClick={onGoHome}
-            className="flex items-center gap-2.5 whitespace-nowrap shrink-0 group text-left cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#0D5C3A] flex items-center justify-center text-white shadow-sm group-hover:bg-[#09432a] transition-colors">
-              <svg
-                className="w-5 h-5 text-amber-300"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-[#0D5C3A] flex items-center gap-1.5 leading-none">
-                CampusShop
-                <span className="text-xs font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60 hidden sm:inline-block">
-                  ৭ ক্যাম্পাস
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink min-w-0">
+            <button
+              type="button"
+              onClick={onGoHome}
+              className="flex items-center gap-2.5 sm:gap-3 shrink min-w-0 group text-left cursor-pointer select-none"
+            >
+              {/* Logo Image - slightly larger, clean cropped badge */}
+              <div className="relative w-11 h-11 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-white shadow-xs border border-emerald-900/15 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+                <img
+                  src={logoUrl || "/images/campus_shop_logo.jpg"}
+                  alt="CampusShop Logo"
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 leading-none">
+                  <span className="text-lg sm:text-xl font-black tracking-tight text-[#0D5C3A] truncate">
+                    CampusShop
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200/70 hidden sm:inline-block shrink-0">
+                    ৭ ক্যাম্পাস
+                  </span>
+                </div>
+                {/* Requested small tagline */}
+                <span className="text-[10px] sm:text-xs text-stone-600 font-medium leading-tight mt-1 truncate max-w-[170px] sm:max-w-xs">
+                  ক্যাম্পাসের সকল প্রয়োজন এক জায়গায়
                 </span>
-              </span>
-              <span className="text-[11px] text-stone-500 font-medium leading-tight mt-0.5">
-                ঢাকা সেন্ট্রাল ইউনিভার্সিটি
-              </span>
-            </div>
-          </button>
+              </div>
+            </button>
+
+            {/* Quick Logo Upload Button */}
+            <button
+              type="button"
+              onClick={() => setIsLogoModalOpen(true)}
+              title="আপনার মূল লোগো আপলোড বা পরিবর্তন করুন"
+              className="p-1.5 rounded-xl text-stone-400 hover:text-[#0D5C3A] hover:bg-emerald-50 border border-stone-200/80 hover:border-emerald-300 transition-all cursor-pointer shrink-0 shadow-2xs"
+            >
+              <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+          </div>
 
           {/* 2. Desktop Navigation: The 5 Requested Tabs (হোম, ক্যাটাগরি, অর্ডার, ট্রাকিং, একাউন্ট) */}
           <nav className="hidden md:flex items-center gap-1.5 lg:gap-2 text-sm font-semibold">
@@ -219,12 +237,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* 3. Action Badges (Favorites, Cart, Language, User Dropdown) */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             
             {/* Language Toggle */}
             <button
               onClick={toggleLang}
-              className="h-9 px-2.5 text-xs font-semibold rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1.5"
+              className="h-8 sm:h-9 px-2 sm:px-2.5 text-[11px] sm:text-xs font-semibold rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1"
               title="Language"
             >
               <Globe className="w-3.5 h-3.5 text-stone-500" />
@@ -234,12 +252,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Favorites */}
             <button
               onClick={onOpenFavorites}
-              className="relative p-2 rounded-xl text-stone-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="relative p-1.5 sm:p-2 rounded-xl text-stone-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
               title={t('favorites')}
             >
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
               {favorites.length > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center font-mono">
+                <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center font-mono">
                   {favorites.length}
                 </span>
               )}
@@ -248,25 +266,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Cart Drawer Trigger */}
             <button
               onClick={openCart}
-              className="h-10 px-3 sm:px-3.5 rounded-xl bg-[#0D5C3A] hover:bg-[#09432a] text-white flex items-center gap-2 transition-all shadow-xs active:scale-[0.98]"
+              className="h-8 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-[#0D5C3A] hover:bg-[#09432a] text-white flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs active:scale-[0.98]"
             >
-              <ShoppingBag className="w-4 h-4 text-amber-300" />
-              <span className="text-xs font-bold hidden sm:inline">ব্যাগ</span>
-              <span className="w-5 h-5 rounded-full bg-white text-[#0D5C3A] text-xs font-extrabold flex items-center justify-center font-mono">
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
+              <span className="text-xs font-bold hidden md:inline">ব্যাগ</span>
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-[#0D5C3A] text-[10px] sm:text-xs font-extrabold flex items-center justify-center font-mono">
                 {cartCount}
               </span>
             </button>
 
-            {/* User Account / Profile Menu (Desktop) */}
             {!user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => openAuthModal('login')}
-                  className="h-10 px-3 sm:px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#0D5C3A] flex items-center gap-2 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                  className="h-8 sm:h-10 px-2.5 sm:px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#0D5C3A] flex items-center gap-1.5 text-xs font-bold transition-all shadow-2xs cursor-pointer"
                 >
-                  <UserIcon className="w-4 h-4 text-[#0D5C3A]" />
-                  <span>লগইন / রেজিস্টার</span>
+                  <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0D5C3A]" />
+                  <span>লগইন</span>
                 </button>
               </div>
             ) : (
@@ -419,7 +436,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* 4. Mobile Fixed Bottom Navigation Bar with the exact 5 Tabs:
           হোম, ক্যাটাগরি, অর্ডার, ট্রাকিং, একাউন্ট */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-2 py-1.5 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-1.5 sm:px-2 py-1.5 shadow-lg max-w-full overflow-x-hidden select-none">
         <div className="grid grid-cols-5 items-center justify-around gap-1">
           
           {/* Tab 1: হোম */}
@@ -494,6 +511,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         </div>
       </nav>
+
+      {/* Real Logo Upload Modal */}
+      <LogoUploadModal
+        isOpen={isLogoModalOpen}
+        onClose={() => setIsLogoModalOpen(false)}
+        currentLogoUrl={logoUrl || "/images/campus_shop_logo.jpg"}
+        onSaveLogo={(newLogo) => {
+          if (onUpdateLogo) {
+            onUpdateLogo(newLogo);
+          }
+        }}
+      />
     </>
   );
 };

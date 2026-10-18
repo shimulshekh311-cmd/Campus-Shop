@@ -105,7 +105,7 @@ export const AccountPage: React.FC<AccountPageProps> = ({
   // If user is not logged in, show production sign-in prompt
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-10 w-full overflow-x-clip">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 mb-6">
           <button
@@ -175,7 +175,7 @@ export const AccountPage: React.FC<AccountPageProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 w-full overflow-x-clip">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 mb-4">
         <button
