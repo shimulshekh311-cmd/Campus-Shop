@@ -175,11 +175,28 @@ export interface DatabaseState {
   reviews: Review[];
   roleApplications: RoleApplication[];
   auditLogs: AuditLog[];
+  campuses?: Campus[];
+  customLogo?: string;
+  customTagline?: string;
 }
 
 export function getInitialDatabaseState(): DatabaseState {
   return {
-    users: [],
+    users: [
+      {
+        id: 'admin-super',
+        name: 'সুপার অ্যাডমিন',
+        email: 'greenearthuniverse11@gmail.com',
+        phone: '01700000001',
+        password: 'admin',
+        role: 'admin',
+        approvalStatus: 'approved',
+        campusId: 'dhaka-college',
+        studentId: 'DC-ADMIN-01',
+        department: 'মার্কেটপ্লেস প্রশাসন',
+        createdAt: new Date().toISOString(),
+      },
+    ],
     stores: [],
     products: [],
     orders: [],
@@ -187,6 +204,9 @@ export function getInitialDatabaseState(): DatabaseState {
     reviews: [],
     roleApplications: [],
     auditLogs: [],
+    campuses: CAMPUSES,
+    customLogo: '/images/campus_shop_logo.jpg',
+    customTagline: 'ক্যাম্পাসের সকল প্রয়োজন এক জায়গায়',
   };
 }
 
@@ -203,7 +223,26 @@ export function getDb(): DatabaseState {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       const loaded = JSON.parse(content);
-      if (loaded && Array.isArray(loaded.users) && Array.isArray(loaded.products)) {
+      if (loaded && Array.isArray(loaded.users)) {
+        if (!loaded.campuses || !Array.isArray(loaded.campuses)) {
+          loaded.campuses = CAMPUSES;
+        }
+        // Ensure bootstrapped admin exists
+        if (!loaded.users.some((u: User) => u.role === 'admin' || u.email === 'greenearthuniverse11@gmail.com')) {
+          loaded.users.push({
+            id: 'admin-super',
+            name: 'সুপার অ্যাডমিন',
+            email: 'greenearthuniverse11@gmail.com',
+            phone: '01700000001',
+            password: 'admin',
+            role: 'admin',
+            approvalStatus: 'approved',
+            campusId: 'dhaka-college',
+            studentId: 'DC-ADMIN-01',
+            department: 'মার্কেটপ্লেস প্রশাসন',
+            createdAt: new Date().toISOString(),
+          });
+        }
         dbCache = loaded;
         return dbCache!;
       }
@@ -217,7 +256,10 @@ export function getDb(): DatabaseState {
     if (fs.existsSync(TMP_DB_FILE)) {
       const content = fs.readFileSync(TMP_DB_FILE, 'utf-8');
       const loaded = JSON.parse(content);
-      if (loaded && Array.isArray(loaded.users) && Array.isArray(loaded.products)) {
+      if (loaded && Array.isArray(loaded.users)) {
+        if (!loaded.campuses || !Array.isArray(loaded.campuses)) {
+          loaded.campuses = CAMPUSES;
+        }
         dbCache = loaded;
         return dbCache!;
       }

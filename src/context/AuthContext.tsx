@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, CampusId } from '../types/index.ts';
+import { syncUserToCloud } from '../firebase/cloudService.ts';
 
 interface AuthContextType {
   user: User | null;
@@ -151,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await res.json();
       if (data.success && data.user) {
         setUser(data.user);
+        syncUserToCloud(data.user);
         localStorage.setItem('campusshop_user_id', data.user.id);
         await fetchCurrentUser(data.user.id);
         setIsAuthModalOpen(false);
@@ -187,6 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const data = await res.json();
       if (data.success && data.user) {
+        syncUserToCloud(data.user);
         if (!data.isPendingApproval) {
           setUser(data.user);
           localStorage.setItem('campusshop_user_id', data.user.id);

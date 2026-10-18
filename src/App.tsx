@@ -495,6 +495,8 @@ function CampusShopApp() {
         onClose={() => setIsAdminPanelOpen(false)}
         campuses={campuses}
         onDataChanged={fetchAllData}
+        logoUrl={logoUrl}
+        onUpdateLogo={handleUpdateLogo}
       />
 
       {/* Special Role Application Modal (Requires Admin Approval) */}

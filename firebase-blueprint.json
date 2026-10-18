@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User account registration and profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["buyer", "seller", "admin", "pickup_staff", "delivery_man", "factory_staff"] },
+        "campusId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "department": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "role", "campusId"]
+    },
+    "product": {
+      "title": "Product",
+      "description": "Item listed for sale in campus marketplace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "campusId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "condition": { "type": "string" },
+        "pickupPointId": { "type": "string" },
+        "isAvailable": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "sellerId", "title", "price", "category", "campusId"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "Marketplace purchase order and lifecycle tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "buyerName": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "campusId": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "pickupPointId": { "type": "string" },
+        "pickupPointName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "buyerId", "sellerId", "totalAmount", "status"]
+    },
+    "campusConfig": {
+      "title": "CampusConfig",
+      "description": "Campus delivery and pickup booth locations configured by admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "shortCode": { "type": "string" },
+        "locationBn": { "type": "string" },
+        "pickupPoints": { "type": "array" }
+      },
+      "required": ["id", "nameBn", "shortCode"]
+    },
+    "siteSettings": {
+      "title": "SiteSettings",
+      "description": "Global website settings like logo, tagline, and operational rules",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "tagline": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/user" },
+      "description": "Store user accounts and profiles"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/product" },
+      "description": "Store campus goods and educational items"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/order" },
+      "description": "Store student orders and delivery progress"
+    },
+    "/campusConfigs/{campusId}": {
+      "schema": { "$ref": "#/entities/campusConfig" },
+      "description": "Campus pickup booth configurations managed by admin"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/siteSettings" },
+      "description": "Global site settings including logo and taglines"
+    }
+  }
+}

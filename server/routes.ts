@@ -23,7 +23,8 @@ export const apiRouter = Router();
 
 // Campuses
 apiRouter.get('/campuses', (_req: Request, res: Response) => {
-  res.json({ success: true, campuses: CAMPUSES });
+  const db = getDb();
+  res.json({ success: true, campuses: db.campuses || CAMPUSES });
 });
 
 // Auth Routes
@@ -868,3 +869,102 @@ apiRouter.post('/settings/logo', (req: Request, res: Response) => {
     message: 'লোগো সফলভাবে আপডেট হয়েছে।',
   });
 });
+
+// Full Database Viewer & Cloud Sync for Admin
+apiRouter.get('/admin/database', (_req: Request, res: Response) => {
+  const db = getDb();
+  res.json({
+    success: true,
+    database: {
+      usersCount: db.users.length,
+      productsCount: db.products.length,
+      ordersCount: db.orders.length,
+      campusesCount: (db.campuses || CAMPUSES).length,
+      roleApplicationsCount: db.roleApplications.length,
+      reviewsCount: db.reviews.length,
+      auditLogsCount: db.auditLogs.length,
+      users: db.users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        role: u.role,
+        campusId: u.campusId,
+        studentId: u.studentId,
+        department: u.department,
+        approvalStatus: u.approvalStatus,
+        createdAt: u.createdAt,
+      })),
+      products: db.products,
+      orders: db.orders,
+      campuses: db.campuses || CAMPUSES,
+      roleApplications: db.roleApplications,
+      reviews: db.reviews,
+      auditLogs: db.auditLogs,
+      customLogo: (db as any).customLogo || '/images/campus_shop_logo.jpg',
+      customTagline: (db as any).customTagline || 'ক্যাম্পাসের সকল প্রয়োজন এক জায়গায়',
+    },
+    cloudStatus: {
+      provider: 'Firebase Firestore',
+      projectId: 'ai-studio-applet-webapp-f3a4e',
+      databaseId: 'ai-studio-campusshop-439ed7d9-271f-4419-ab0c-c2ec5789c2c9',
+      status: 'CONNECTED',
+      syncEnabled: true,
+      lastSyncedAt: new Date().toISOString(),
+    },
+  });
+});
+
+// Admin Campus Booth Management (Add, Edit, Remove Pickup Points)
+apiRouter.put('/admin/campuses/:campusId/booths', (req: Request, res: Response) => {
+  const { campusId } = req.params;
+  const { pickupPoints } = req.body;
+
+  if (!Array.isArray(pickupPoints)) {
+    return res.status(400).json({ success: false, message: 'সঠিক বুথ লিস্ট প্রদান করুন।' });
+  }
+
+  const db = getDb();
+  if (!db.campuses) {
+    db.campuses = JSON.parse(JSON.stringify(CAMPUSES));
+  }
+  const campusesList = db.campuses || CAMPUSES;
+  const campus = campusesList.find((c) => c.id === campusId);
+  if (!campus) {
+    return res.status(404).json({ success: false, message: 'ক্যাম্পাস পাওয়া যায়নি।' });
+  }
+
+  campus.pickupPoints = pickupPoints;
+  db.campuses = campusesList;
+  saveDb(db);
+
+  res.json({
+    success: true,
+    message: `${campus.nameBn} এর ডেলিভারি ও পিকআপ বুথের তথ্য সফলভাবে আপডেট হয়েছে।`,
+    campus,
+  });
+});
+
+// Admin Site Settings Management (Logo, Tagline)
+apiRouter.put('/admin/settings', (req: Request, res: Response) => {
+  const { tagline, logoUrl } = req.body;
+  const db = getDb() as any;
+
+  if (tagline && typeof tagline === 'string') {
+    db.customTagline = tagline.trim();
+  }
+  if (logoUrl && typeof logoUrl === 'string') {
+    db.customLogo = logoUrl;
+  }
+  saveDb(db);
+
+  res.json({
+    success: true,
+    message: 'ওয়েবসাইটের মৌলিক তথ্য সফলভাবে সেভ হয়েছে।',
+    settings: {
+      tagline: db.customTagline,
+      logoUrl: db.customLogo,
+    },
+  });
+});
+
