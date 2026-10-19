@@ -18,6 +18,7 @@ interface AuthContextType {
   switchAccount: (targetUserId: string) => Promise<boolean>;
   createLinkedBuyerAccount: () => Promise<boolean>;
   login: (credential: string, password?: string) => Promise<{ success: boolean; message?: string }>;
+  resetPassword: (credential: string, newPassword: string) => Promise<{ success: boolean; message?: string }>;
   register: (data: {
     name: string;
     email: string;
@@ -211,6 +212,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (credential: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        setUser(data.user);
+        syncUserToCloud(data.user);
+        localStorage.setItem('campusshop_user_id', data.user.id);
+        await fetchCurrentUser(data.user.id);
+        return { success: true, message: data.message };
+      }
+      return { success: false, message: data.message || 'পাসওয়ার্ড পরিবর্তন করা যায়নি' };
+    } catch {
+      return { success: false, message: 'সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('campusshop_user_id');
     setUser(null);
@@ -249,6 +274,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchAccount,
         createLinkedBuyerAccount,
         login,
+        resetPassword,
         register,
         logout,
         refreshUser,

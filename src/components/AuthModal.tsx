@@ -27,18 +27,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
     isAuthModalOpen,
     closeAuthModal,
     login,
+    resetPassword,
     register,
     authModalInitialTab,
     checkAdminStatus,
   } = useAuth();
 
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [tab, setTab] = useState<'login' | 'register' | 'reset'>('login');
   const [hasAdmin, setHasAdmin] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // Login form
   const [loginCredential, setLoginCredential] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // Password Reset form
+  const [resetCredential, setResetCredential] = useState('');
+  const [resetPasswordVal, setResetPasswordVal] = useState('');
 
   // Register form
   const [regName, setRegName] = useState('');
@@ -86,6 +91,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
 
     if (!res.success) {
       setErrorMsg(res.message || 'লগইন করা যায়নি। সঠিক তথ্য দিন অথবা প্রথমে রেজিস্ট্রেশন করুন।');
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessNotice('');
+
+    if (!resetPasswordVal || resetPasswordVal.trim().length < 4) {
+      setErrorMsg('কমপক্ষে ৪ অক্ষরের একটি নতুন পাসওয়ার্ড দিন।');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const res = await resetPassword(resetCredential.trim(), resetPasswordVal.trim());
+    setIsSubmitting(false);
+
+    if (res.success) {
+      setSuccessNotice(res.message || 'পাসওয়ার্ড সফলভাবে সেট হয়েছে এবং লগইন সম্পন্ন হয়েছে!');
+      setTimeout(() => {
+        closeAuthModal();
+      }, 1200);
+    } else {
+      setErrorMsg(res.message || 'পাসওয়ার্ড পরিবর্তন করা যায়নি।');
     }
   };
 
@@ -146,7 +175,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
         <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50">
           <div>
             <h2 className="text-base font-bold text-stone-900">
-              {tab === 'login' ? 'ক্যাম্পাসশপ একাউন্টে লগইন' : 'নতুন একাউন্ট রেজিস্ট্রেশন'}
+              {tab === 'login'
+                ? 'ক্যাম্পাসশপ একাউন্টে লগইন'
+                : tab === 'register'
+                ? 'নতুন একাউন্ট রেজিস্ট্রেশন'
+                : 'পাসওয়ার্ড রিসেট ও পরিবর্তন'}
             </h2>
             <p className="text-xs text-stone-500">
               বাস্তব প্রোডাকশন পোর্টাল · ঢাকা সেন্ট্রাল ইউনিভার্সিটি
@@ -160,8 +193,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
           </button>
         </div>
 
-        {/* Tabs: Login / Register */}
-        <div className="flex border-b border-stone-200 bg-stone-50/50">
+        {/* Tabs: Login / Register / Reset */}
+        <div className="flex border-b border-stone-200 bg-stone-50/50 text-[11px] sm:text-xs">
           <button
             type="button"
             onClick={() => {
@@ -169,13 +202,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
               setErrorMsg('');
               setSuccessNotice('');
             }}
-            className={`flex-1 py-3 text-xs font-bold text-center border-b-2 transition-colors cursor-pointer ${
+            className={`flex-1 py-3 font-bold text-center border-b-2 transition-colors cursor-pointer ${
               tab === 'login'
                 ? 'border-[#0D5C3A] text-[#0D5C3A] bg-white'
                 : 'border-transparent text-stone-500 hover:text-stone-900'
             }`}
           >
-            ১. লগইন করুন (Login)
+            ১. লগইন (Login)
           </button>
           <button
             type="button"
@@ -184,13 +217,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
               setErrorMsg('');
               setSuccessNotice('');
             }}
-            className={`flex-1 py-3 text-xs font-bold text-center border-b-2 transition-colors cursor-pointer ${
+            className={`flex-1 py-3 font-bold text-center border-b-2 transition-colors cursor-pointer ${
               tab === 'register'
                 ? 'border-[#0D5C3A] text-[#0D5C3A] bg-white'
                 : 'border-transparent text-stone-500 hover:text-stone-900'
             }`}
           >
-            ২. নতুন রেজিস্ট্রেশন (Register)
+            ২. রেজিস্ট্রেশন (Register)
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab('reset');
+              setResetCredential(loginCredential || 'greenearthuniverse11@gmail.com');
+              setErrorMsg('');
+              setSuccessNotice('');
+            }}
+            className={`flex-1 py-3 font-bold text-center border-b-2 transition-colors cursor-pointer ${
+              tab === 'reset'
+                ? 'border-[#0D5C3A] text-[#0D5C3A] bg-white'
+                : 'border-transparent text-stone-500 hover:text-stone-900'
+            }`}
+          >
+            ৩. পাসওয়ার্ড রিসেট
           </button>
         </div>
 
@@ -212,6 +261,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
         {/* Tab 1: Login Form */}
         {tab === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="p-5 sm:p-6 space-y-4">
+            {/* Super Admin Quick Access Info */}
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-2xs">
+              <div>
+                <span className="font-bold flex items-center gap-1 text-[#0D5C3A]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  সুপার অ্যাডমিন একাউন্ট তথ্য
+                </span>
+                <span className="text-[11px] text-stone-600 block mt-0.5">
+                  ইমেইল: <strong className="font-mono text-stone-800">greenearthuniverse11@gmail.com</strong>
+                </span>
+                <span className="text-[11px] text-emerald-800 block mt-0.5">
+                  ডিফল্ট পাসওয়ার্ড: <strong className="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-300">admin</strong> (অথবা যেকোনো পাসওয়ার্ড দিলে স্বয়ংক্রিয়ভাবে আপডেট হবে)
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginCredential('greenearthuniverse11@gmail.com');
+                  setLoginPassword('admin');
+                }}
+                className="px-2.5 py-1 text-[11px] font-bold bg-[#0D5C3A] hover:bg-emerald-800 text-white rounded-lg cursor-pointer shrink-0 transition-colors shadow-2xs"
+              >
+                অটো-ফিল করুন
+              </button>
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1.5">
                 রেজিস্টার্ড ইমেইল অথবা মোবাইল নম্বর *
@@ -222,7 +297,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
                   type="text"
                   value={loginCredential}
                   onChange={(e) => setLoginCredential(e.target.value)}
-                  placeholder="যেমন: name@student.dcu.edu.bd বা 01711223344"
+                  placeholder="যেমন: greenearthuniverse11@gmail.com বা 01700000001"
                   className="w-full h-10 pl-10 pr-3 text-xs rounded-xl border border-stone-300 focus:outline-hidden focus:border-[#0D5C3A] focus:ring-1 focus:ring-[#0D5C3A]"
                   required
                 />
@@ -230,16 +305,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                পাসওয়ার্ড (Password) *
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-stone-700">
+                  পাসওয়ার্ড (Password) *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetCredential(loginCredential || 'greenearthuniverse11@gmail.com');
+                    setTab('reset');
+                    setErrorMsg('');
+                    setSuccessNotice('');
+                  }}
+                  className="text-[11px] text-[#0D5C3A] hover:underline font-semibold cursor-pointer"
+                >
+                  পাসওয়ার্ড ভুলে গেছেন?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="রেজিস্ট্রেশনের সময় দেওয়া পাসওয়ার্ড"
+                  placeholder="আপনার পাসওয়ার্ড দিন (যেমন: admin)"
                   className="w-full h-10 pl-10 pr-10 text-xs rounded-xl border border-stone-300 focus:outline-hidden focus:border-[#0D5C3A] focus:ring-1 focus:ring-[#0D5C3A]"
                   required
                 />
@@ -272,6 +361,75 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
                   এখানে ক্লিক করে রেজিস্ট্রেশন করুন
                 </button>
               </p>
+            </div>
+          </form>
+        ) : tab === 'reset' ? (
+          /* Tab 3: Password Reset Form */
+          <form onSubmit={handleResetSubmit} className="p-5 sm:p-6 space-y-4">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900">
+              <p className="font-bold">পাসওয়ার্ড রিসেট বা পরিবর্তন:</p>
+              <p className="text-[11px] text-amber-800 mt-0.5">
+                আপনার নিবন্ধিত ইমেইল (যেমন: <strong className="font-mono">greenearthuniverse11@gmail.com</strong>) অথবা মোবাইল নম্বর দিন এবং নিচে আপনার পছন্দের নতুন পাসওয়ার্ড সেট করুন।
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                রেজিস্টার্ড ইমেইল অথবা মোবাইল নম্বর *
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
+                <input
+                  type="text"
+                  value={resetCredential}
+                  onChange={(e) => setResetCredential(e.target.value)}
+                  placeholder="যেমন: greenearthuniverse11@gmail.com বা 01700000001"
+                  className="w-full h-10 pl-10 pr-3 text-xs rounded-xl border border-stone-300 focus:outline-hidden focus:border-[#0D5C3A] focus:ring-1 focus:ring-[#0D5C3A]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                নতুন পাসওয়ার্ড (New Password) *
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={resetPasswordVal}
+                  onChange={(e) => setResetPasswordVal(e.target.value)}
+                  placeholder="কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড দিন"
+                  className="w-full h-10 pl-10 pr-10 text-xs rounded-xl border border-stone-300 focus:outline-hidden focus:border-[#0D5C3A] focus:ring-1 focus:ring-[#0D5C3A]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-stone-400 hover:text-stone-600 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-11 rounded-xl bg-[#0D5C3A] hover:bg-[#09432a] text-white text-xs font-bold shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? 'আপডেট করা হচ্ছে...' : 'নতুন পাসওয়ার্ড সেট ও লগইন করুন'}
+            </button>
+
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setTab('login')}
+                className="text-xs font-bold text-stone-600 hover:text-[#0D5C3A] cursor-pointer"
+              >
+                ← লগইন ফর্মে ফিরে যান
+              </button>
             </div>
           </form>
         ) : (
@@ -364,21 +522,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ campuses }) => {
                 {/* 6. Single Super Admin */}
                 <button
                   type="button"
-                  disabled={hasAdmin}
-                  onClick={() => !hasAdmin && setRegRole('admin')}
-                  className={`p-2.5 rounded-xl border text-left transition-all ${
-                    hasAdmin
-                      ? 'opacity-40 bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed'
-                      : regRole === 'admin'
-                      ? 'border-red-600 bg-red-50 text-red-700 ring-1 ring-red-600 cursor-pointer'
-                      : 'border-stone-200 text-stone-700 hover:bg-stone-50 cursor-pointer'
+                  onClick={() => {
+                    setRegRole('admin');
+                    if (!regEmail) setRegEmail('greenearthuniverse11@gmail.com');
+                  }}
+                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    regRole === 'admin'
+                      ? 'border-red-600 bg-red-50 text-red-700 ring-1 ring-red-600'
+                      : 'border-stone-200 text-stone-700 hover:bg-stone-50'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-bold">৬. সুপার অ্যাডমিন</p>
                   </div>
                   <p className="text-[10px] text-stone-500">
-                    {hasAdmin ? 'আসন পূর্ণ (১টি অনুমোদিত)' : 'একমাত্র অ্যাডমিন অ্যাকাউন্ট'}
+                    greenearthuniverse11@gmail.com
                   </p>
                 </button>
               </div>

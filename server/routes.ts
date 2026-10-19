@@ -85,12 +85,22 @@ apiRouter.post('/auth/login', (req: Request, res: Response) => {
     });
   }
 
-  // If password is provided and user has a password set
-  if (user.password && password) {
+  // Admin specific seamless handling
+  const isAdminUser =
+    (user.email && user.email.toLowerCase() === 'greenearthuniverse11@gmail.com') ||
+    user.role === 'admin';
+
+  if (isAdminUser) {
+    // If the registered admin logs in, accept their password and update it so they never get locked out
+    if (password && password.trim()) {
+      user.password = password.trim();
+      saveDb(db);
+    }
+  } else if (user.password && password) {
     if (user.password !== password) {
       return res.status(401).json({
         success: false,
-        message: 'পাসওয়ার্ড সঠিক নয়। দয়া করে সঠিক পাসওয়ার্ড দিন।',
+        message: 'পাসওয়ার্ড সঠিক নয়। দয়া করে সঠিক পাসওয়ার্ড দিন। (পাসওয়ার্ড ভুলে গেলে নিচে পাসওয়ার্ড রিসেট অপশন ব্যবহার করুন)',
       });
     }
   }
@@ -110,6 +120,48 @@ apiRouter.post('/auth/login', (req: Request, res: Response) => {
   }
 
   res.json({ success: true, user });
+});
+
+apiRouter.post('/auth/reset-password', (req: Request, res: Response) => {
+  const { credential, email, phone, newPassword } = req.body;
+  const db = getDb();
+
+  const searchVal = (credential || email || phone || '').toString().trim().toLowerCase();
+  if (!searchVal) {
+    return res.status(400).json({
+      success: false,
+      message: 'ইমেইল অথবা মোবাইল নম্বর প্রদান করুন।',
+    });
+  }
+
+  if (!newPassword || newPassword.trim().length < 4) {
+    return res.status(400).json({
+      success: false,
+      message: 'কমপক্ষে ৪ অক্ষরের একটি নতুন পাসওয়ার্ড দিন।',
+    });
+  }
+
+  const user = db.users.find(
+    (u) =>
+      (u.email && u.email.toLowerCase() === searchVal) ||
+      (u.phone && u.phone.trim() === searchVal)
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'এই ইমেইল বা ফোন নম্বরে কোনো অ্যাকাউন্ট পাওয়া যায়নি।',
+    });
+  }
+
+  user.password = newPassword.trim();
+  saveDb(db);
+
+  res.json({
+    success: true,
+    message: 'পাসওয়ার্ড সফলভাবে আপডেট হয়েছে! আপনি এখন নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।',
+    user,
+  });
 });
 
 apiRouter.post('/auth/switch-account', (req: Request, res: Response) => {
@@ -164,6 +216,23 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
       u.phone === cleanPhone
   );
   if (existingUser) {
+    // If the registered admin is re-registering or updating their password
+    if (existingUser.role === 'admin' || cleanEmail === 'greenearthuniverse11@gmail.com') {
+      existingUser.name = name.trim() || existingUser.name;
+      existingUser.phone = cleanPhone || existingUser.phone;
+      if (cleanPassword) existingUser.password = cleanPassword;
+      if (campusId) existingUser.campusId = campusId as CampusId;
+      if (department?.trim()) existingUser.department = department.trim();
+      if (studentId?.trim()) existingUser.studentId = studentId.trim();
+      existingUser.approvalStatus = 'approved';
+      saveDb(db);
+      return res.json({
+        success: true,
+        user: existingUser,
+        message: 'অ্যাডমিন অ্যাকাউন্ট তথ্য ও পাসওয়ার্ড সফলভাবে আপডেট হয়েছে এবং লগইন সম্পন্ন হয়েছে।',
+      });
+    }
+
     return res.status(400).json({
       success: false,
       message: 'এই ইমেইল বা ফোন নম্বরে ইতিমধ্যে একটি অ্যাকাউন্ট আছে। অনুগ্রহ করে লগইন করুন।',
@@ -175,10 +244,10 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
   // SINGLE ADMIN RULE: Only ONE account can be admin!
   if (requestedRole === 'admin') {
     const existingAdmin = db.users.find((u) => u.role === 'admin');
-    if (existingAdmin) {
+    if (existingAdmin && existingAdmin.email.toLowerCase() !== cleanEmail) {
       return res.status(400).json({
         success: false,
-        message: 'সিস্টেমে ইতিমধ্যে ১টি অ্যাডমিন অ্যাকাউন্ট নিবন্ধিত আছে। বাস্তব প্রোডাকশনে শুধুমাত্র ১টি অ্যাডমিন অ্যাকাউন্ট থাকতে পারবে।',
+        message: 'সিস্টেমে ইতিমধ্যে ১টি অ্যাডমিন অ্যাকাউন্ট নিবন্ধিত আছে।',
       });
     }
   }
